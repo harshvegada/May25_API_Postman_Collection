@@ -297,7 +297,11 @@
 									"    console.log(skills);\r",
 									"    // let skillList = jsonResponse.data.filter(skillObj => skillObj.id === pm.collectionVariables.get(\"skillID\"));\r",
 									"    // pm.expect(skillList.length).above(0);\r",
-									"})"
+									"})\r",
+									"\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
 								],
 								"type": "text/javascript",
 								"packages": {}
@@ -357,6 +361,10 @@
 								"exec": [
 									"pm.test(\"Validate Scuess Message\", function(){\r",
 									"    pm.expect(pm.response.json().messages.success).to.eql(\"Successfully Saved\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Status code is 201\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
 									"});"
 								],
 								"type": "text/javascript",
