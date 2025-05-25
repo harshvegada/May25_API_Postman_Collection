@@ -1,0 +1,1353 @@
+{
+	"info": {
+		"_postman_id": "d5853458-bb69-4e7e-8bc7-588209132ba7",
+		"name": "OrangeHRM-TC",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "25438666",
+		"_collection_link": "https://www.postman.com/apijuly24/workspace/may25-api-tc/collection/25438666-d5853458-bb69-4e7e-8bc7-588209132ba7?action=share&source=collection_link&creator=25438666"
+	},
+	"item": [
+		{
+			"name": "authToken",
+			"item": [
+				{
+					"name": "1.LoginAPI_CSRF_Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"\r",
+									"\r",
+									"pm.test(\"Get CSRF Token\", function(){\r",
+									"    let cheerio = require('cheerio');\r",
+									"    let htmlTextResponse = cheerio.load(pm.response.text());\r",
+									"    let csrfToken = htmlTextResponse(\"input[name='login[_csrf_token]']\").attr('value');\r",
+									"    pm.collectionVariables.set(\"csrf_token\",csrfToken);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://virtus2025-trials7161.orangehrmlive.com/auth/login",
+							"protocol": "https",
+							"host": [
+								"virtus2025-trials7161",
+								"orangehrmlive",
+								"com"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2.ValidateCredential",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "login[_csrf_token]",
+									"value": "{{csrf_token}}",
+									"type": "text"
+								},
+								{
+									"key": "hdnUserTimeZoneOffset",
+									"value": "5.5",
+									"type": "text"
+								},
+								{
+									"key": "txtUsername",
+									"value": "{{userName}}",
+									"type": "text"
+								},
+								{
+									"key": "txtPassword",
+									"value": "{{password}}",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "https://virtus2025-trials7161.orangehrmlive.com/auth/validateCredentials",
+							"protocol": "https",
+							"host": [
+								"virtus2025-trials7161",
+								"orangehrmlive",
+								"com"
+							],
+							"path": [
+								"auth",
+								"validateCredentials"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3.GetAccessToken",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Access Token\", function(){\r",
+									"    let jsonResponse = pm.response.json();\r",
+									"    pm.collectionVariables.set(\"access_token\", jsonResponse.token.access_token);\r",
+									"})"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://virtus2025-trials7161.orangehrmlive.com/core/getLoggedInAccountToken",
+							"protocol": "https",
+							"host": [
+								"virtus2025-trials7161",
+								"orangehrmlive",
+								"com"
+							],
+							"path": [
+								"core",
+								"getLoggedInAccountToken"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Dashboard",
+			"item": [
+				{
+					"name": "Widget API",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://virtus2025-trials7161.orangehrmlive.com/api/dashboard/widgets",
+							"protocol": "https",
+							"host": [
+								"virtus2025-trials7161",
+								"orangehrmlive",
+								"com"
+							],
+							"path": [
+								"api",
+								"dashboard",
+								"widgets"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "CRUD_Skill",
+			"item": [
+				{
+					"name": "Create_Skill",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Capature Skill ID\", function(){\r",
+									"    let jsonResponse = pm.response.json();\r",
+									"    pm.collectionVariables.set(\"skillID\", jsonResponse.data.id);\r",
+									"    pm.expect(jsonResponse.data.name).equal(pm.variables.get(\"name\"));\r",
+									"     pm.expect(jsonResponse.data.description).equal(pm.variables.get(\"description\"));\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.variables.set(\"name\", pm.variables.replaceIn(\"{{$randomCompanyName}}\"));\r",
+									"pm.variables.set(\"description\", pm.variables.replaceIn(\"{{$randomLoremSentence}}\"));\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"{{name}}\",\r\n    \"description\": \"{{description}}\"\r\n}"
+						},
+						"url": {
+							"raw": "{{baseURI}}/api/skills",
+							"host": [
+								"{{baseURI}}"
+							],
+							"path": [
+								"api",
+								"skills"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get_All_Skill",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Validate created ID present\", function(){\r",
+									"    let jsonResponse = pm.response.json();\r",
+									"    let skills = [];\r",
+									"\r",
+									"    // for(let i = 0;i< jsonResponse.data.length;i++){\r",
+									"    //     if(jsonResponse.data[i].id === pm.collectionVariables.get(\"skillID\")){\r",
+									"    //         skills.push(jsonResponse.data[i]);\r",
+									"    //     }\r",
+									"    // }\r",
+									"\r",
+									"    // jsonResponse.forEach(skilObj => skilObj.id === pm.collectionVariables.get(\"skillID\") ? skills.push(skilObj) : null)\r",
+									"\r",
+									"    console.log(skills);\r",
+									"    // let skillList = jsonResponse.data.filter(skillObj => skillObj.id === pm.collectionVariables.get(\"skillID\"));\r",
+									"    // pm.expect(skillList.length).above(0);\r",
+									"})"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseURI}}/api/skills",
+							"host": [
+								"{{baseURI}}"
+							],
+							"path": [
+								"api",
+								"skills"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update_Skill",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Validate Scuess Message\", function(){\r",
+									"    pm.expect(pm.response.json().messages.success).to.eql(\"Successfully Saved\");\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.variables.set(\"name\", pm.variables.replaceIn(\"{{$randomCompanyName}}\"));\r",
+									"pm.variables.set(\"description\", pm.variables.replaceIn(\"{{$randomLoremSentence}}\"));\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"{{name}}\",\r\n    \"description\": \"{{description}}\"\r\n}"
+						},
+						"url": {
+							"raw": "{{baseURI}}/api/skills/{{skillID}}",
+							"host": [
+								"{{baseURI}}"
+							],
+							"path": [
+								"api",
+								"skills",
+								"{{skillID}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete_Skill",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 204\", function () {\r",
+									"    pm.response.to.have.status(204);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"data\": [\r\n        \"{{skillID}}\"\r\n    ]\r\n}"
+						},
+						"url": {
+							"raw": "{{baseURI}}/api/skills",
+							"host": [
+								"{{baseURI}}"
+							],
+							"path": [
+								"api",
+								"skills"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetSkill_WithFilters",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Validate Sorting Order for Name is same or not\", function(){\r",
+									"    let jsonData = pm.response.json();\r",
+									"    let actualEducationList = jsonData.data.map(educationObj => educationObj.id);\r",
+									"    let expectedEducationList = jsonData.data.map(educationObj => parseInt(educationObj.id)).sort((a, b) => a - b).map(id => id.toString());\r",
+									"   \r",
+									"    console.log(expectedEducationList);\r",
+									"    console.log(actualEducationList);\r",
+									"    // console.log(actualEducationList);\r",
+									"    pm.expect(actualEducationList).eql(expectedEducationList);\r",
+									"\r",
+									"    //Deeep Check -> equals -> Memory Address, Data type of value, content same\r",
+									"    //Content Check -> eql -> Content\r",
+									"})"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseURI}}/api/skills?limit=50&offset=0&sortingFeild=id&sortingOrder=ASC",
+							"host": [
+								"{{baseURI}}"
+							],
+							"path": [
+								"api",
+								"skills"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "50"
+								},
+								{
+									"key": "offset",
+									"value": "0"
+								},
+								{
+									"key": "sortingFeild",
+									"value": "id"
+								},
+								{
+									"key": "sortingOrder",
+									"value": "ASC"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "CRUD_Education",
+			"item": [
+				{
+					"name": "CreateEducation",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"capture Eduction ID\", function(){\r",
+									"    let jsonData = pm.response.json();\r",
+									"    pm.collectionVariables.set(\"eductionID\", jsonData.data.id);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.variables.set(\"name\", pm.variables.replaceIn(\"{{$randomDepartment}}\"));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"{{name}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURI}}/api/education",
+							"host": [
+								"{{baseURI}}"
+							],
+							"path": [
+								"api",
+								"education"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetEduction",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURI}}/api/education",
+							"host": [
+								"{{baseURI}}"
+							],
+							"path": [
+								"api",
+								"education"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "EditEducation",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Validate Message\", function(){\r",
+									"    pm.expect(pm.response.json().messages.success).to.eql(\"Successfully Saved\");\r",
+									"})"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.variables.set(\"name\", pm.variables.replaceIn(\"{{$randomDepartment}}\"));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"{{name}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURI}}/api/education/{{eductionID}}",
+							"host": [
+								"{{baseURI}}"
+							],
+							"path": [
+								"api",
+								"education",
+								"{{eductionID}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DeleteEduction",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 204\", function () {\r",
+									"    pm.response.to.have.status(204);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"data\": [\r\n        \"{{eductionID}}\"\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURI}}/api/education",
+							"host": [
+								"{{baseURI}}"
+							],
+							"path": [
+								"api",
+								"education"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "CRUD_Vendor",
+			"item": [
+				{
+					"name": "GetVendorLatestID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Fetch Latest VendorID\", function(){\r",
+									"    let jsonData = pm.response.json();\r",
+									"    let lastVendorId = jsonData.meta.lastVendorId;\r",
+									"    let nextAvailableVendroID = lastVendorId + 1;\r",
+									"    let stringNextAvailable = String(nextAvailableVendroID);\r",
+									"    \r",
+									"    if(stringNextAvailable.length >= 2 && stringNextAvailable.length < 3){\r",
+									"        nextAvailableVendroID = '0' + (lastVendorId + 1);\r",
+									"    }\r",
+									"    pm.collectionVariables.set(\"nextAvailableVendroID\", nextAvailableVendroID);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURI}}/api/assets/vendors",
+							"host": [
+								"{{baseURI}}"
+							],
+							"path": [
+								"api",
+								"assets",
+								"vendors"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CreateVendor",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Fetch Latest VendorID\", function(){\r",
+									"    let jsonData = pm.response.json();\r",
+									"    let lastVendorId = jsonData.meta.lastVendorId;\r",
+									"    let nextAvailableVendroID = lastVendorId + 1;\r",
+									"    let stringNextAvailable = String(nextAvailableVendroID);\r",
+									"    \r",
+									"    if(stringNextAvailable.length >= 2 && stringNextAvailable.length < 3){\r",
+									"        nextAvailableVendroID = '0' + (lastVendorId + 1);\r",
+									"    }\r",
+									"    pm.collectionVariables.set(\"nextAvailableVendroID\", nextAvailableVendroID);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"capture vendor details\", function(){\r",
+									"    let jsonData = pm.response.json();\r",
+									"    pm.collectionVariables.set(\"vendorCurrentID\", jsonData.data.id);\r",
+									"    pm.collectionVariables.set(\"vendorCurrentCode\", jsonData.data.vendorCode);\r",
+									"    pm.collectionVariables.set(\"vendorCurrentCompanyName\", jsonData.data.vendorName);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Scehma Validation For the Create Vendro\", function(){\r",
+									"    let scehmaForVendor = {\r",
+									"  \"$schema\": \"http://json-schema.org/draft-07/schema#\",\r",
+									"  \"title\": \"Generated schema for Root\",\r",
+									"  \"type\": \"object\",\r",
+									"  \"properties\": {\r",
+									"    \"data\": {\r",
+									"      \"type\": \"object\",\r",
+									"      \"properties\": {\r",
+									"        \"id\": {\r",
+									"          \"type\": \"string\"\r",
+									"        },\r",
+									"        \"vendorCode\": {\r",
+									"          \"type\": \"string\"\r",
+									"        },\r",
+									"        \"vendorName\": {\r",
+									"          \"type\": \"string\"\r",
+									"        },\r",
+									"        \"address\": {\r",
+									"          \"type\": \"string\"\r",
+									"        },\r",
+									"        \"isDeleted\": {\r",
+									"          \"type\": \"string\"\r",
+									"        },\r",
+									"        \"contactNo\": {\r",
+									"          \"type\": \"string\"\r",
+									"        },\r",
+									"        \"email\": {\r",
+									"          \"type\": \"string\"\r",
+									"        },\r",
+									"        \"website\": {\r",
+									"          \"type\": \"string\"\r",
+									"        },\r",
+									"        \"created_at\": {\r",
+									"          \"type\": \"string\"\r",
+									"        },\r",
+									"        \"updated_at\": {\r",
+									"          \"type\": \"string\"\r",
+									"        }\r",
+									"      },\r",
+									"      \"required\": [\r",
+									"        \"id\",\r",
+									"        \"vendorCode\",\r",
+									"        \"vendorName\",\r",
+									"        \"address\",\r",
+									"        \"isDeleted\",\r",
+									"        \"contactNo\",\r",
+									"        \"email\",\r",
+									"        \"website\",\r",
+									"        \"created_at\",\r",
+									"        \"updated_at\"\r",
+									"      ]\r",
+									"    },\r",
+									"    \"meta\": {\r",
+									"      \"type\": \"object\",\r",
+									"      \"properties\": {\r",
+									"        \"lastVendorId\": {\r",
+									"          \"type\": \"number\"\r",
+									"        },\r",
+									"        \"permissions\": {\r",
+									"          \"type\": \"object\",\r",
+									"          \"properties\": {\r",
+									"            \"delete\": {\r",
+									"              \"type\": \"boolean\"\r",
+									"            }\r",
+									"          },\r",
+									"          \"required\": [\r",
+									"            \"delete\"\r",
+									"          ]\r",
+									"        }\r",
+									"      },\r",
+									"      \"required\": [\r",
+									"        \"lastVendorId\",\r",
+									"        \"permissions\"\r",
+									"      ]\r",
+									"    }\r",
+									"  },\r",
+									"  \"required\": [\r",
+									"    \"data\",\r",
+									"    \"meta\"\r",
+									"  ]\r",
+									"};\r",
+									"    pm.response.to.have.jsonSchema(scehmaForVendor);\r",
+									"});\r",
+									"\r",
+									"\r",
+									"\r",
+									"\r",
+									"\r",
+									"\r",
+									"\r",
+									"\r",
+									"\r",
+									"\r",
+									"\r",
+									"\r",
+									"\r",
+									"\r",
+									"\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"//Loop [for, each, forEach, filter....]\r",
+									"//If condition\r",
+									"//convertion -> int - string\r",
+									"//equality\r",
+									"//array -> method\r",
+									"//string -> method\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"abc@abc.com\",\r\n    \"address\": \"India\",\r\n    \"website\": \"https://www.google.com\",\r\n    \"contactNo\": \"1234567890\",\r\n    \"vendorCode\": \"{{nextAvailableVendroID}}\",\r\n    \"vendorName\": \"{{$randomCompanyName}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURI}}/api/assets/vendors",
+							"host": [
+								"{{baseURI}}"
+							],
+							"path": [
+								"api",
+								"assets",
+								"vendors"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UpdateVendorRequest",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"abc@abc.com\",\r\n    \"address\": \"India\",\r\n    \"website\": \"https://www.google.com\",\r\n    \"contactNo\": \"{{$randomPhoneNumber}}\",\r\n    \"vendorCode\": \"{{vendorCurrentCode}}\",\r\n    \"vendorName\": \"{{vendorCurrentCompanyName}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURI}}/api/assets/vendors/{{vendorCurrentID}}",
+							"host": [
+								"{{baseURI}}"
+							],
+							"path": [
+								"api",
+								"assets",
+								"vendors",
+								"{{vendorCurrentID}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "CURD_Assest",
+			"item": [
+				{
+					"name": "GetAllAssest",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Fetch Latest Assest Details\", function(){\r",
+									"    let jsonData = pm.response.json();\r",
+									"    let lastAssestId = jsonData.meta.lastAssetId;\r",
+									"    let nextAvailableAssestID = lastAssestId + 1;\r",
+									"    let stringNextAvailable = String(nextAvailableAssestID);\r",
+									"    \r",
+									"    if(stringNextAvailable.length >= 2 && stringNextAvailable.length < 3){\r",
+									"        nextAvailableAssestID = '0' + (lastAssestId + 1);\r",
+									"    }\r",
+									"    pm.collectionVariables.set(\"nextAvailableAssestID\", nextAvailableAssestID);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURI}}/api/assets?excludeFields=description&listType=employee_assets&page[limit]=0",
+							"host": [
+								"{{baseURI}}"
+							],
+							"path": [
+								"api",
+								"assets"
+							],
+							"query": [
+								{
+									"key": "excludeFields",
+									"value": "description"
+								},
+								{
+									"key": "listType",
+									"value": "employee_assets"
+								},
+								{
+									"key": "page[limit]",
+									"value": "0"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CreateAsset",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Fetch Latest Assest Details\", function(){\r",
+									"    let jsonData = pm.response.json();\r",
+									"    let lastAssestId = jsonData.meta.lastAssetId;\r",
+									"    let nextAvailableAssestID = lastAssestId + 1;\r",
+									"    let stringNextAvailable = String(nextAvailableAssestID);\r",
+									"    \r",
+									"    if(stringNextAvailable.length >= 2 && stringNextAvailable.length < 3){\r",
+									"        nextAvailableAssestID = '0' + (lastAssestId + 1);\r",
+									"    }\r",
+									"    pm.collectionVariables.set(\"nextAvailableAssestID\", nextAvailableAssestID);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"assetCode\": \"{{nextAvailableAssestID}}\",\r\n    \"assetName\": \"{{$randomUUID}}\",\r\n    \"model\": \"{{$randomLoremWords}}\",\r\n    \"description\": \"{{$randomJobDescriptor}}\",\r\n    \"brandId\": \"4\",\r\n    \"vendorId\": \"25\",\r\n    \"categoryId\": \"1\",\r\n    \"locationId\": \"12\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURI}}/api/assets",
+							"host": [
+								"{{baseURI}}"
+							],
+							"path": [
+								"api",
+								"assets"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "CRUD_Employee",
+			"item": [
+				{
+					"name": "CreateEmployee",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Capture Emp ID\", function(){\r",
+									"    pm.collectionVariables.set(\"empId\", pm.response.json().data.empNumber);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "[\r\n    {\r\n        \"endpoint\": \"employees\",\r\n        \"method\": \"POST\",\r\n        \"data\": {\r\n            \"firstName\": \"Anjali\",\r\n            \"middleName\": \"\",\r\n            \"lastName\": \"Shukla\",\r\n            \"locationId\": \"1\",\r\n            \"joinedDate\": \"2025-05-24\",\r\n            \"autoGenerateEmployeeId\": true,\r\n            \"initiatePreboarding\": false,\r\n            \"employeeId\": null\r\n        },\r\n        \"params\": {}\r\n    },\r\n    {\r\n        \"endpoint\": \"employees/<EMPNUMBER>\",\r\n        \"method\": \"PATCH\",\r\n        \"data\": {\r\n            \"firstName\": \"Anjali\",\r\n            \"middleName\": \"\",\r\n            \"lastName\": \"Shukla\",\r\n            \"emp_gender\": \"2\",\r\n            \"emp_marital_status\": null,\r\n            \"nation_code\": null,\r\n            \"emp_birthday\": null,\r\n            \"emp_dri_lice_exp_date\": null\r\n        },\r\n        \"params\": {}\r\n    },\r\n    {\r\n        \"endpoint\": \"employees/<EMPNUMBER>\",\r\n        \"method\": \"PATCH\",\r\n        \"data\": {\r\n            \"firstName\": \"Anjali\",\r\n            \"middleName\": \"\",\r\n            \"lastName\": \"Shukla\",\r\n            \"emp_gender\": \"1\",\r\n            \"emp_marital_status\": null,\r\n            \"nation_code\": null,\r\n            \"ssn\": \"12436567\",\r\n            \"emp_birthday\": null,\r\n            \"emp_dri_lice_exp_date\": null\r\n        },\r\n        \"params\": {}\r\n    },\r\n    {\r\n        \"endpoint\": \"employees/<EMPNUMBER>/job\",\r\n        \"method\": \"PATCH\",\r\n        \"data\": {\r\n            \"joined_date\": \"2025-05-24\",\r\n            \"probation_end_date\": null,\r\n            \"date_of_permanency\": null,\r\n            \"job_title_id\": \"\",\r\n            \"employment_status_id\": \"\",\r\n            \"job_category_id\": \"\",\r\n            \"subunit_id\": \"\",\r\n            \"location_id\": \"1\",\r\n            \"work_schedule_id\": \"2\",\r\n            \"cost_centre_id\": null,\r\n            \"has_contract_details\": \"1\",\r\n            \"contract_start_date\": null,\r\n            \"contract_end_date\": null,\r\n            \"comment\": \"\",\r\n            \"effective_date\": \"2025-05-24\",\r\n            \"event_id\": \"1\"\r\n        },\r\n        \"params\": {}\r\n    },\r\n    {\r\n        \"endpoint\": \"employeeOnboarding/<EMPNUMBER>/create\",\r\n        \"method\": \"POST\",\r\n        \"data\": {\r\n            \"data\": {\r\n                \"eventTemplate\": \"1\",\r\n                \"dueDate\": \"2025-06-08\",\r\n                \"owners\": [\r\n                    \"29\",\r\n                    \"38\"\r\n                ]\r\n            }\r\n        },\r\n        \"params\": {}\r\n    }\r\n]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURI}}/api/wizard",
+							"host": [
+								"{{baseURI}}"
+							],
+							"path": [
+								"api",
+								"wizard"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DeleteEmployee",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"reason\": \"9\",\r\n    \"date\": \"2025-05-24\",\r\n    \"time\": \"09:46\",\r\n    \"timezone\": \"Etc/GMT+5\",\r\n    \"note\": \"Resign 1\",\r\n    \"flaged\": \"0\",\r\n    \"terminateNow\": \"1\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURI}}/api/employees/{{empId}}/termination-record",
+							"host": [
+								"{{baseURI}}"
+							],
+							"path": [
+								"api",
+								"employees",
+								"{{empId}}",
+								"termination-record"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{access_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "access_token",
+			"value": "91a7e3a6d90d934c0c1834ce49402ab6d573d038"
+		},
+		{
+			"key": "csrf_token",
+			"value": "32e10797d3ef221b9fecd4557268ff05"
+		},
+		{
+			"key": "skillID",
+			"value": "58"
+		},
+		{
+			"key": "eductionID",
+			"value": "16"
+		},
+		{
+			"key": "nextAvailableVendroID",
+			"value": "042"
+		},
+		{
+			"key": "vendorCurrentID",
+			"value": "41"
+		},
+		{
+			"key": "vendorCurrentCode",
+			"value": "041"
+		},
+		{
+			"key": "vendorCurrentCompanyName",
+			"value": "Kshlerin, Schneider and Walker"
+		},
+		{
+			"key": "nextAvailableAssestID",
+			"value": "020"
+		},
+		{
+			"key": "empId",
+			"value": "217"
+		}
+	]
+}
